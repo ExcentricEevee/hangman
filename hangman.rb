@@ -8,6 +8,7 @@ in lieu of loading a new game.
 =end
 
 require 'pry'
+require 'json'
 
 module Dictionary
   def filter_dictionary(dictionary)
@@ -31,23 +32,38 @@ module Dictionary
   end
 end
 
+module JSONable
+  def to_json
+    hash = {}
+    self.instance_variables.each do |var|
+      hash[var] = self.instance_variable_get(var)
+    end
+
+    hash.to_json
+  end
+
+  def from_json!(string)
+    JSON.load(string).each do |var, value|
+      self.instance_variable_set(var, value)
+    end
+  end
+end
+
+#needs encapsulation; display of incorrect letters
 class Hangman
-  include Dictionary
+  include Dictionary, JSONable
   attr_reader :word
-  attr_accessor :answer, :mistakes
+  attr_accessor :answer, :mistakes, :incorrect
 
   def initialize
     @word = get_word.split("")
     @answer = Array.new(@word.length, "_")
+    @incorrect = Array.new
     @mistakes = 7
   end
 
-  def start
-    puts "Welcome to Hangman!\n\n"
-    puts "Discover the secret word by guessing one letter at a time.\nPress [Enter] to start"
-    puts "#[Debug] The word is: #{@word.join}#"
-    gets
-
+  #to keep #welcome DRY
+  def cycle
     gameover = false
     #keep going until all letters are guessed or they're out of mistakes
     until gameover
@@ -55,35 +71,66 @@ class Hangman
     end
   end
 
-  def turn
-    puts "#{@answer.join(" ")}\nMistakes left: #{@mistakes}\n\n"
-    print "Guess a letter: "
-    guess = gets.downcase.chomp
+  def welcome
+    puts "Welcome to Hangman!"
+    puts "Discover the secret word by guessing one letter at a time.\n\n"
+    puts "#[Debug] The word is: #{@word.join}#"
 
-    count = 0
-    self.word.each_with_index do |char, idx|
-      #check is case insensitive while maintaining caps on original word
-      if (char.downcase == guess)
-        self.answer[idx] = guess
-        count += 1
+    puts "New game, or loading a save?"
+    response = gets.chomp
+    #needs cleaning up; put the gameover/turn loop into its own method
+    if (response.downcase.include?("new"))
+      cycle
+    elsif (response.downcase.include?("load"))
+      File.open('save.json', 'r') do |file|
+        self.from_json!(file)
       end
-    end
 
-    if count == 0
-      puts "That letter isn't in the word!"
-      self.mistakes -= 1
+      cycle
     end
-
-    #Check if they won or lost before the next turn
-    gameover_check
   end
 
-  #for the next method "gameover_check" to keep it DRY
+  def turn
+
+    puts "#{@answer.join(" ")}\nMistakes left: #{@mistakes}	Incorrect: #{@incorrect.join(" ")}\n\n"
+    print "Guess a letter, or save game: "
+    guess = gets.downcase.chomp
+
+    if guess == "save"
+      File.open('save.json', 'w') do |file|
+        file.puts(self.to_json)
+      end
+    elsif !(guess.length == 1)
+      puts "Please use one letter at a time.\n\n"
+    elsif (self.incorrect.include?(guess) || self.answer.include?(guess))
+      puts "You guessed this already!\n\n"
+    else
+      count = 0
+      self.word.each_with_index do |char, idx|
+        #check is case insensitive while maintaining caps on original word
+        if (char.downcase == guess)
+          self.answer[idx] = guess
+          count += 1
+        end
+      end
+
+      if count == 0
+        puts "That letter isn't in the word!"
+        self.mistakes -= 1
+        self.incorrect.push(guess)
+      end
+
+      #Check if they won or lost before the next turn
+      gameover_check
+    end
+  end
+
+  #for the next method, "gameover_check," to keep it DRY
   def response
     response = gets.chomp
     if (response.downcase == "yes" || response.downcase == "y")
       initialize
-      start
+      welcome
       return true
     elsif (response.downcase == "no" || response.downcase == "n")
      return true
@@ -104,4 +151,4 @@ class Hangman
 end
 
 game = Hangman.new
-game.start
+game.welcome
