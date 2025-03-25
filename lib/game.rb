@@ -9,6 +9,14 @@ class Game
     @player_word = ""
   end
 
+  def make_guess
+    puts "Guess a letter"
+    char = gets.chomp.chr
+    char.match?(/[a-zA-Z]/) ? char : "Try again"
+  end
+
+  private
+
   def set_word
     dict = File.open("dictionary.txt")
 
