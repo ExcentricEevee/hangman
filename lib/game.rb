@@ -1,8 +1,6 @@
 # For handling game state and functions
 class Game
   attr_accessor :player_word
-  # for debugging purposes; player should not see secret word
-  attr_reader :secret_word
 
   def initialize
     @secret_word = set_word
@@ -11,11 +9,19 @@ class Game
 
   def make_guess
     puts "Guess a letter"
+    # debug check
+    puts "Word: #{secret_word}"
     char = gets.chomp.chr
     char.match?(/[a-zA-Z]/) ? char : "Try again"
   end
 
+  def letter_in_word?(guess)
+    fill_player_word if secret_word.include?(guess)
+  end
+
   private
+
+  attr_reader :secret_word
 
   def set_word
     dict = File.open("dictionary.txt")
@@ -28,5 +34,9 @@ class Game
     dict.close
 
     word_list.sample
+  end
+
+  def fill_player_word
+    p "that's right!"
   end
 end
