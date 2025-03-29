@@ -4,7 +4,7 @@ class Game
 
   def initialize
     @secret_word = set_word
-    @player_word = ""
+    @player_word = insert_blanks
   end
 
   def make_guess
@@ -16,7 +16,7 @@ class Game
   end
 
   def letter_in_word?(guess)
-    fill_player_word if secret_word.include?(guess)
+    fill_player_word(guess) if secret_word.include?(guess)
   end
 
   private
@@ -36,7 +36,18 @@ class Game
     word_list.sample
   end
 
-  def fill_player_word
-    p "that's right!"
+  def insert_blanks
+    str = ""
+    secret_word.length.times do
+      str = "#{str}_"
+    end
+
+    str.chomp
+  end
+
+  def fill_player_word(guess)
+    secret_word.chars.each_index do |idx|
+      player_word[idx] = guess if secret_word[idx] == guess
+    end
   end
 end
