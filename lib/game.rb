@@ -11,8 +11,8 @@ class Game
     puts "Guess a letter"
     # debug check
     puts "Word: #{secret_word}"
-    char = gets.chomp.chr
-    char.match?(/[a-zA-Z]/) ? char : "Try again"
+    char = gets.chomp.chr.downcase
+    char.match?(/[a-z]/) ? char : "Try again"
   end
 
   def letter_in_word?(guess)
