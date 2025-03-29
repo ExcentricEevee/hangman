@@ -12,7 +12,7 @@ only the first letter will be used.\n\n"
 loop do
   guess = g.make_guess
   g.letter_in_word?(guess)
-  puts "Player Word: #{g.player_word}\n\n"
+  puts "Player Word: #{g.formatted_player_word}\n\n"
 
   if g.word_complete?
     puts "You won!"

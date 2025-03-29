@@ -7,6 +7,12 @@ class Game
     @player_word = insert_blanks
   end
 
+  def formatted_player_word
+    str = []
+    player_word.chars.map { |char| str.push("#{char} ") }
+    str.join
+  end
+
   def make_guess
     puts "Guess a letter"
     # debug check
