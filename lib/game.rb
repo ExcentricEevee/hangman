@@ -19,6 +19,10 @@ class Game
     fill_player_word(guess) if secret_word.include?(guess)
   end
 
+  def word_complete?
+    player_word == secret_word
+  end
+
   private
 
   attr_reader :secret_word
