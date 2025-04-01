@@ -1,3 +1,5 @@
+require "yaml"
+
 # For handling game state and functions
 class Game
   attr_accessor :player_word
@@ -16,14 +18,6 @@ class Game
     str.join
   end
 
-  def make_guess
-    puts "Guess a letter"
-    # debug check
-    puts "Word: #{secret_word}"
-    char = gets.chomp.chr.downcase
-    char.match?(/[a-z]/) ? char : "Try again"
-  end
-
   def letter_in_word?(guess)
     if player_word.include?(guess) || wrong_letters.include?(guess)
       puts "You guessed this already, please try another letter."
@@ -36,6 +30,15 @@ class Game
 
   def word_complete?
     player_word == secret_word
+  end
+
+  def to_yaml
+    YAML.dump({
+      secret_word: secret_word,
+      player_word: player_word,
+      mistakes: mistakes,
+      wrong_letters: wrong_letters
+    })
   end
 
   private

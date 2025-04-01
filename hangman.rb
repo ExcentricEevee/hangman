@@ -6,9 +6,16 @@ def start_game
   limit = 6
 
   loop do
-    guess = g.make_guess
-    puts # to put a newline after the input line
-    g.letter_in_word?(guess)
+    guess = make_guess
+    puts
+    if guess == "save"
+      f = File.new("save.yaml", "w")
+      f.puts g.to_yaml
+      f.close
+      puts "Game saved"
+    else
+      g.letter_in_word?(guess)
+    end
 
     if g.mistakes >= limit
       puts "You've made too many mistakes; you lose!"
@@ -23,6 +30,17 @@ def start_game
       puts "You won!"
       break
     end
+  end
+end
+
+def make_guess
+  puts "Guess a letter"
+  char = gets.chomp.downcase
+  if char == "save"
+    char
+  else
+    # TODO: fix "Try again" return string being read as an incorrect guess
+    char.chr.match?(/[a-z]/) ? char.chr : "Try again"
   end
 end
 
