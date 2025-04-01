@@ -1,6 +1,7 @@
 # For handling game state and functions
 class Game
-  attr_accessor :player_word, :mistakes, :wrong_letters
+  attr_accessor :player_word
+  attr_reader :mistakes, :wrong_letters
 
   def initialize
     @secret_word = set_word
@@ -40,6 +41,7 @@ class Game
   private
 
   attr_reader :secret_word
+  attr_writer :mistakes, :wrong_letters
 
   def set_word
     dict = File.open("dictionary.txt")
