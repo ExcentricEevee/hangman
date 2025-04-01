@@ -5,11 +5,20 @@ class Game
   attr_accessor :player_word
   attr_reader :mistakes, :wrong_letters
 
-  def initialize
-    @secret_word = set_word
-    @player_word = insert_blanks
-    @mistakes = 0
-    @wrong_letters = []
+  def initialize(secret_word = set_word, player_word = "", mistakes = 0, wrong_letters = [])
+    @secret_word = secret_word
+    @player_word = player_word
+    @mistakes = mistakes
+    @wrong_letters = wrong_letters
+  end
+
+  def insert_blanks
+    str = ""
+    secret_word.length.times do
+      str = "#{str}_"
+    end
+
+    str.chomp
   end
 
   def formatted_player_word
@@ -57,15 +66,6 @@ class Game
     dict.close
 
     word_list.sample
-  end
-
-  def insert_blanks
-    str = ""
-    secret_word.length.times do
-      str = "#{str}_"
-    end
-
-    str.chomp
   end
 
   def fill_player_word(guess)

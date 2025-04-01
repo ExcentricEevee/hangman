@@ -1,33 +1,40 @@
 require_relative "lib/game"
 
-# Gameplay loop
-def start_game
+def new_game
   g = Game.new
-  limit = 6
+  g.player_word = g.insert_blanks
 
+  limit = 6
+  game_loop(g, limit)
+end
+
+def load_game
+  data = YAML.load(File.open("save.yaml"))
+  g = Game.new(
+    data[:secret_word],
+    data[:player_word],
+    data[:mistakes],
+    data[:wrong_letters]
+  )
+
+  limit = 6
+  print_info(g, limit)
+  game_loop(g, limit)
+end
+
+def game_loop(game, limit)
   loop do
     guess = make_guess
     puts
-    if guess == "save"
-      f = File.new("save.yaml", "w")
-      f.puts g.to_yaml
-      f.close
-      puts "Game saved"
-    else
-      g.letter_in_word?(guess)
-    end
+    guess == "save" ? save_game(game) : game.letter_in_word?(guess)
 
-    if g.mistakes >= limit
-      puts "You've made too many mistakes; you lose!"
-      break
-    end
+    print_info(game, limit)
 
-    puts "Player Word: #{g.formatted_player_word}"
-    puts "Mistakes: #{g.mistakes} / #{limit}"
-    puts "Wrong Letters: #{g.wrong_letters}\n\n"
-
-    if g.word_complete?
+    if game.word_complete?
       puts "You won!"
+      break
+    elsif game.mistakes >= limit
+      puts "You've made too many mistakes; you lose!"
       break
     end
   end
@@ -44,6 +51,19 @@ def make_guess
   end
 end
 
+def print_info(game, limit)
+  puts "Player Word: #{game.formatted_player_word}"
+  puts "Mistakes: #{game.mistakes} / #{limit}"
+  puts "Wrong Letters: #{game.wrong_letters}\n\n"
+end
+
+def save_game(game)
+  f = File.new("save.yaml", "w")
+  f.puts game.to_yaml
+  f.close
+  puts "Game saved"
+end
+
 # Introduction
 puts "\nWelcome to Hangman! A random secret word has been set,
 and you must guess what it is one letter at a time.
@@ -54,9 +74,9 @@ only the first letter will be used.\n\n"
 loop do
   puts "Please type (S)tart to begin a new game,"
   puts "or (L)oad to continue a saved game"
-  input = gets.chomp.downcase
+  input = gets.chomp.chr.downcase
   if input == "s"
-    start_game
+    new_game
     break
   elsif input == "l"
     load_game
